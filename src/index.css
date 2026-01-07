@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    --background: 120 20% 97%;
+    --foreground: 120 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 120 30% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 120 30% 15%;
+
+    --primary: 142 55% 35%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 35 60% 50%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 120 15% 90%;
+    --muted-foreground: 120 10% 40%;
+
+    --accent: 200 70% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 120 20% 85%;
+    --input: 120 20% 85%;
+    --ring: 142 55% 35%;
+
+    --radius: 1rem;
+
+    /* Custom agriculture tokens */
+    --earth: 30 40% 30%;
+    --earth-light: 30 30% 85%;
+    --sky: 200 80% 55%;
+    --sky-light: 200 70% 92%;
+    --harvest: 45 90% 50%;
+    --harvest-foreground: 30 40% 20%;
+    --growth: 142 60% 40%;
+    --growth-light: 142 50% 90%;
+
+    /* Gradients */
+    --gradient-sky: linear-gradient(180deg, hsl(200 80% 55%) 0%, hsl(200 70% 70%) 100%);
+    --gradient-earth: linear-gradient(180deg, hsl(142 55% 35%) 0%, hsl(120 30% 25%) 100%);
+    --gradient-harvest: linear-gradient(135deg, hsl(45 90% 50%) 0%, hsl(35 80% 45%) 100%);
+
+    /* Shadows */
+    --shadow-soft: 0 4px 20px -4px hsl(120 30% 15% / 0.1);
+    --shadow-card: 0 8px 30px -8px hsl(120 30% 15% / 0.15);
+    --shadow-glow: 0 0 40px hsl(142 55% 35% / 0.2);
+  }
+
+  .dark {
+    --background: 120 20% 10%;
+    --foreground: 120 10% 95%;
+
+    --card: 120 20% 15%;
+    --card-foreground: 120 10% 95%;
+
+    --popover: 120 20% 15%;
+    --popover-foreground: 120 10% 95%;
+
+    --primary: 142 50% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 35 50% 45%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 120 15% 20%;
+    --muted-foreground: 120 10% 60%;
+
+    --accent: 200 60% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 120 15% 25%;
+    --input: 120 15% 25%;
+    --ring: 142 50% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-nunito;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .gradient-sky {
+    background: var(--gradient-sky);
+  }
+  
+  .gradient-earth {
+    background: var(--gradient-earth);
+  }
+  
+  .gradient-harvest {
+    background: var(--gradient-harvest);
+  }
+  
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+  
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer components {
+  .feature-card {
+    @apply bg-card rounded-2xl p-6 shadow-card border border-border/50 transition-all duration-300 hover:shadow-glow hover:-translate-y-1;
+  }
+
+  .btn-farmer {
+    @apply px-8 py-4 text-lg font-bold rounded-xl transition-all duration-300 shadow-soft hover:shadow-card hover:-translate-y-0.5 active:translate-y-0;
+  }
+}

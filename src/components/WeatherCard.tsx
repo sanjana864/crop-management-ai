@@ -1,5 +1,7 @@
+import { useState, useEffect } from "react";
 import { Cloud, Sun, CloudRain, Wind, Droplets, Thermometer, Loader2 } from "lucide-react";
 import { useWeather } from "@/hooks/useWeather";
+import { LocationSelector, LOCATIONS } from "./LocationSelector";
 
 const WeatherIcon = ({ condition }: { condition: string }) => {
   switch (condition) {
@@ -15,13 +17,47 @@ const WeatherIcon = ({ condition }: { condition: string }) => {
 };
 
 export const WeatherCard = () => {
-  const { weather, loading, error } = useWeather();
+  const [selectedLocationName, setSelectedLocationName] = useState("Current Location");
+  const [coords, setCoords] = useState<{ lat?: number; lon?: number; useCurrentLocation: boolean }>({
+    useCurrentLocation: true,
+  });
+
+  const { weather, loading, error } = useWeather({
+    latitude: coords.lat,
+    longitude: coords.lon,
+    useCurrentLocation: coords.useCurrentLocation,
+  });
+
+  const handleLocationChange = (locationName: string) => {
+    setSelectedLocationName(locationName);
+    
+    if (locationName === "Current Location") {
+      setCoords({ useCurrentLocation: true });
+    } else {
+      const location = LOCATIONS.find((l) => l.name === locationName);
+      if (location) {
+        setCoords({
+          lat: location.lat,
+          lon: location.lon,
+          useCurrentLocation: false,
+        });
+      }
+    }
+  };
 
   if (loading) {
     return (
-      <div className="feature-card flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <span className="ml-3 text-muted-foreground">Fetching weather data...</span>
+      <div className="feature-card">
+        <div className="flex justify-between items-center mb-4">
+          <LocationSelector
+            selectedLocation={selectedLocationName}
+            onLocationChange={handleLocationChange}
+          />
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <span className="ml-3 text-muted-foreground">Fetching weather data...</span>
+        </div>
       </div>
     );
   }
@@ -29,6 +65,12 @@ export const WeatherCard = () => {
   if (error || !weather) {
     return (
       <div className="feature-card">
+        <div className="flex justify-between items-center mb-4">
+          <LocationSelector
+            selectedLocation={selectedLocationName}
+            onLocationChange={handleLocationChange}
+          />
+        </div>
         <div className="text-center py-8 text-muted-foreground">
           <Cloud className="w-12 h-12 mx-auto mb-3 opacity-50" />
           <p>Unable to fetch weather data</p>
@@ -40,6 +82,13 @@ export const WeatherCard = () => {
 
   return (
     <div className="feature-card">
+      <div className="flex justify-between items-center mb-6">
+        <LocationSelector
+          selectedLocation={selectedLocationName}
+          onLocationChange={handleLocationChange}
+        />
+      </div>
+      
       <div className="flex flex-col md:flex-row items-center gap-6">
         <div className="flex flex-col items-center">
           <WeatherIcon condition={weather.condition} />

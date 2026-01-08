@@ -53,26 +53,113 @@ const languages = [
 const getFarmingResponse = (query: string, lang: string): string => {
   const lowerQuery = query.toLowerCase();
   
-  if (lowerQuery.includes("harvest") || lowerQuery.includes("wheat")) {
-    return "Based on your location and current weather, your wheat crop should be ready for harvest in 2-3 weeks. Look for golden color and dry stalks. Best time to harvest is early morning when dew has dried.";
-  }
-  if (lowerQuery.includes("water") || lowerQuery.includes("irrigation")) {
-    return "For optimal irrigation, water your crops early morning or late evening to minimize evaporation. Check soil moisture 2-3 inches deep before watering.";
-  }
-  if (lowerQuery.includes("pest") || lowerQuery.includes("disease")) {
-    return "For pest control, use neem-based organic pesticides. Inspect crops regularly and remove affected leaves. Maintain proper spacing between plants for air circulation.";
-  }
-  if (lowerQuery.includes("fertilizer") || lowerQuery.includes("nutrient")) {
-    return "Apply NPK fertilizer based on soil test results. For most crops, apply nitrogen in split doses. Use organic compost to improve soil health.";
-  }
-  if (lowerQuery.includes("weather") || lowerQuery.includes("rain")) {
-    return "Check the weather forecast before planning field activities. If rain is expected, delay fertilizer application. Cover sensitive crops during heavy rainfall.";
-  }
-  if (lowerQuery.includes("seed") || lowerQuery.includes("sowing")) {
-    return "Use certified seeds from authorized dealers. Treat seeds with fungicide before sowing. Maintain proper seed spacing for optimal growth.";
+  // Crop-specific responses
+  if (lowerQuery.includes("rice") || lowerQuery.includes("paddy")) {
+    if (lowerQuery.includes("plant") || lowerQuery.includes("sow")) {
+      return "Rice is best planted during monsoon season (June-July). Prepare nursery beds 25-30 days before transplanting. Maintain 2-3 inches of standing water in paddy fields.";
+    }
+    if (lowerQuery.includes("harvest")) {
+      return "Rice is ready for harvest when grains turn golden yellow and moisture content is 20-25%. Harvest 30-35 days after flowering. Dry grains to 14% moisture for storage.";
+    }
+    return "Rice requires 1200-1500mm water. Use SRI method for better yield. Apply 120kg nitrogen, 60kg phosphorus, 40kg potassium per hectare.";
   }
   
-  return "I can help you with farming queries about harvesting, irrigation, pest control, fertilizers, weather guidance, and seed selection. Please ask a specific question about your crops.";
+  if (lowerQuery.includes("wheat")) {
+    if (lowerQuery.includes("plant") || lowerQuery.includes("sow")) {
+      return "Wheat sowing time is November-December. Use 100-125 kg seeds per hectare. Maintain row spacing of 20-22.5 cm for optimal growth.";
+    }
+    if (lowerQuery.includes("harvest")) {
+      return "Wheat is ready when grains are hard and golden. Harvest at 12-14% moisture. Best time is early morning after dew dries. Expected yield: 40-50 quintals per hectare.";
+    }
+    return "Wheat needs 4-6 irrigations. First at crown root stage (21 days), second at tillering, third at jointing, fourth at flowering, fifth at milking stage.";
+  }
+  
+  if (lowerQuery.includes("sugarcane")) {
+    if (lowerQuery.includes("plant")) {
+      return "Plant sugarcane in February-March or September-October. Use 3-budded setts from disease-free cane. Maintain 90-100 cm row spacing.";
+    }
+    if (lowerQuery.includes("harvest")) {
+      return "Sugarcane matures in 10-12 months. Harvest when brix reading is 18-20%. Cut cane close to ground for better ratoon crop.";
+    }
+    return "Sugarcane needs regular irrigation every 7-10 days. Earthing up at 90 and 120 days is essential. Apply trash mulching for moisture retention.";
+  }
+  
+  if (lowerQuery.includes("cotton")) {
+    if (lowerQuery.includes("plant") || lowerQuery.includes("sow")) {
+      return "Cotton is sown in May-June with onset of monsoon. Use 2-2.5 kg seeds per hectare. Maintain plant spacing of 60x30 cm.";
+    }
+    if (lowerQuery.includes("pest") || lowerQuery.includes("bollworm")) {
+      return "For bollworm control, use pheromone traps and neem-based sprays. Release Trichogramma wasps for biological control. Avoid excessive nitrogen.";
+    }
+    return "Cotton needs 700-1200mm water. Pick cotton when bolls fully open. First picking 150-160 days after sowing, continue every 15 days.";
+  }
+  
+  if (lowerQuery.includes("tomato")) {
+    if (lowerQuery.includes("plant")) {
+      return "Transplant tomato seedlings 25-30 days old. Space plants 60x45 cm apart. Stake plants when they reach 30 cm height.";
+    }
+    if (lowerQuery.includes("disease") || lowerQuery.includes("blight")) {
+      return "For late blight, apply copper-based fungicides. Remove infected leaves immediately. Ensure proper spacing for air circulation.";
+    }
+    return "Tomatoes need 600-800mm water. Harvest when fruits turn red. Apply calcium to prevent blossom end rot.";
+  }
+  
+  if (lowerQuery.includes("maize") || lowerQuery.includes("corn")) {
+    if (lowerQuery.includes("plant") || lowerQuery.includes("sow")) {
+      return "Sow maize in June-July for kharif or January-February for rabi. Use 20-25 kg seeds per hectare. Maintain 60x20 cm spacing.";
+    }
+    if (lowerQuery.includes("harvest")) {
+      return "Maize is ready when husks turn brown and kernels are hard. Harvest at 25% moisture for grain, 35% for silage.";
+    }
+    return "Maize needs 500-600mm water. Apply nitrogen in 3 splits - at sowing, knee-high stage, and tasseling.";
+  }
+  
+  // General topic responses
+  if (lowerQuery.includes("water") || lowerQuery.includes("irrigation")) {
+    return "For optimal irrigation, water crops early morning or late evening to minimize evaporation. Use drip irrigation to save 30-40% water. Check soil moisture 2-3 inches deep before watering.";
+  }
+  
+  if (lowerQuery.includes("pest") || lowerQuery.includes("insect")) {
+    return "For integrated pest management: Use pheromone traps for monitoring, release natural predators like ladybugs, apply neem oil spray weekly, and rotate crops annually.";
+  }
+  
+  if (lowerQuery.includes("disease") || lowerQuery.includes("fungus") || lowerQuery.includes("infection")) {
+    return "For disease control: Remove infected plants immediately, apply copper-based fungicides, ensure proper drainage, use disease-resistant varieties, and practice crop rotation.";
+  }
+  
+  if (lowerQuery.includes("fertilizer") || lowerQuery.includes("nutrient") || lowerQuery.includes("manure")) {
+    return "Apply fertilizers based on soil test. General NPK ratio is 4:2:1 for most crops. Use organic manure 2-3 tons per hectare. Apply nitrogen in splits for better uptake.";
+  }
+  
+  if (lowerQuery.includes("weather") || lowerQuery.includes("rain") || lowerQuery.includes("climate")) {
+    return "Monitor weather forecasts daily. Delay fertilizer application before rain. Prepare drainage channels before monsoon. Cover nurseries during hailstorm warnings.";
+  }
+  
+  if (lowerQuery.includes("seed") || lowerQuery.includes("sowing") || lowerQuery.includes("plant")) {
+    return "Use certified seeds from authorized dealers. Treat seeds with Thiram or Carbendazim before sowing. Check germination rate - should be above 85%.";
+  }
+  
+  if (lowerQuery.includes("soil") || lowerQuery.includes("land")) {
+    return "Test soil every 2-3 years for pH and nutrients. Add lime if pH is below 6.0, add sulfur if above 7.5. Incorporate organic matter to improve soil structure.";
+  }
+  
+  if (lowerQuery.includes("price") || lowerQuery.includes("market") || lowerQuery.includes("sell")) {
+    return "Check AGMARKNET portal for daily mandi prices. Consider direct selling through Farmer Producer Organizations. Store produce properly to sell when prices are favorable.";
+  }
+  
+  if (lowerQuery.includes("loan") || lowerQuery.includes("subsidy") || lowerQuery.includes("scheme")) {
+    return "Apply for Kisan Credit Card for easy loans. Check PM-KISAN scheme for direct income support. Visit nearest agriculture office for subsidy information on equipment.";
+  }
+  
+  if (lowerQuery.includes("hello") || lowerQuery.includes("hi") || lowerQuery.includes("hey")) {
+    return "Hello! I'm your farming assistant. Ask me about crop cultivation, irrigation, pest control, fertilizers, weather guidance, market prices, or government schemes. How can I help you today?";
+  }
+  
+  if (lowerQuery.includes("thank")) {
+    return "You're welcome! Feel free to ask more questions about farming. I'm here to help you grow better crops and improve your farm productivity.";
+  }
+  
+  return "I can help you with farming queries about specific crops (rice, wheat, cotton, sugarcane, tomato, maize), irrigation, pest control, fertilizers, soil health, weather, market prices, and government schemes. Please ask a specific question!";
 };
 
 export const VoiceAssistant = () => {

@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Leaf, Droplets, Calendar, AlertTriangle, CheckCircle, Globe } from "lucide-react";
+import { Leaf, Droplets, Calendar, AlertTriangle, CheckCircle, Globe, Sparkles, Loader2, MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -7,6 +9,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type Language = 'en' | 'ta' | 'hi' | 'te';
 
@@ -31,6 +35,11 @@ const labels: Record<Language, {
   tips: string;
   warnings: string;
   selectCrop: string;
+  askAI: string;
+  aiPlaceholder: string;
+  getAdvice: string;
+  aiRecommendation: string;
+  poweredBy: string;
 }> = {
   en: {
     title: "Fertilizer Guide",
@@ -41,7 +50,12 @@ const labels: Record<Language, {
     bestTime: "Best Time",
     tips: "Tips for Best Results",
     warnings: "Warnings",
-    selectCrop: "Complete fertilizer guide"
+    selectCrop: "Complete fertilizer guide",
+    askAI: "Ask AI for personalized advice",
+    aiPlaceholder: "Ask any question about fertilizers... (e.g., 'What fertilizer for clay soil?' or 'Best time to apply urea?')",
+    getAdvice: "Get AI Advice",
+    aiRecommendation: "AI Recommendation",
+    poweredBy: "Powered by Gemini AI"
   },
   ta: {
     title: "உர வழிகாட்டி",
@@ -52,7 +66,12 @@ const labels: Record<Language, {
     bestTime: "சிறந்த நேரம்",
     tips: "சிறந்த முடிவுகளுக்கான குறிப்புகள்",
     warnings: "எச்சரிக்கைகள்",
-    selectCrop: "முழுமையான உர வழிகாட்டி"
+    selectCrop: "முழுமையான உர வழிகாட்டி",
+    askAI: "தனிப்பயனாக்கப்பட்ட ஆலோசனைக்கு AI-ஐ கேளுங்கள்",
+    aiPlaceholder: "உரங்கள் பற்றி ஏதேனும் கேள்வி கேளுங்கள்...",
+    getAdvice: "AI ஆலோசனை பெறுங்கள்",
+    aiRecommendation: "AI பரிந்துரை",
+    poweredBy: "Gemini AI மூலம் இயக்கப்படுகிறது"
   },
   hi: {
     title: "उर्वरक गाइड",
@@ -63,7 +82,12 @@ const labels: Record<Language, {
     bestTime: "सबसे अच्छा समय",
     tips: "सर्वोत्तम परिणामों के लिए सुझाव",
     warnings: "चेतावनियां",
-    selectCrop: "संपूर्ण उर्वरक गाइड"
+    selectCrop: "संपूर्ण उर्वरक गाइड",
+    askAI: "व्यक्तिगत सलाह के लिए AI से पूछें",
+    aiPlaceholder: "उर्वरकों के बारे में कोई भी सवाल पूछें...",
+    getAdvice: "AI सलाह प्राप्त करें",
+    aiRecommendation: "AI अनुशंसा",
+    poweredBy: "Gemini AI द्वारा संचालित"
   },
   te: {
     title: "ఎరువుల గైడ్",
@@ -74,7 +98,12 @@ const labels: Record<Language, {
     bestTime: "ఉత్తమ సమయం",
     tips: "మంచి ఫలితాల కోసం చిట్కాలు",
     warnings: "హెచ్చరికలు",
-    selectCrop: "పూర్తి ఎరువుల గైడ్"
+    selectCrop: "పూర్తి ఎరువుల గైడ్",
+    askAI: "వ్యక్తిగత సలహా కోసం AI ని అడగండి",
+    aiPlaceholder: "ఎరువుల గురించి ఏదైనా ప్రశ్న అడగండి...",
+    getAdvice: "AI సలహా పొందండి",
+    aiRecommendation: "AI సిఫార్సు",
+    poweredBy: "Gemini AI ద్వారా నడుస్తుంది"
   }
 };
 
@@ -595,8 +624,49 @@ const languages: { code: Language; name: string; nativeName: string }[] = [
 export const FertilizerGuide = () => {
   const [selectedCrop, setSelectedCrop] = useState<CropFertilizer | null>(null);
   const [language, setLanguage] = useState<Language>('en');
+  const [question, setQuestion] = useState('');
+  const [aiResponse, setAiResponse] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const t = labels[language];
+
+  const getAIAdvice = async () => {
+    if (!selectedCrop && !question.trim()) {
+      toast.error("Please select a crop or ask a question");
+      return;
+    }
+
+    setIsLoading(true);
+    setAiResponse('');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('fertilizer-ai', {
+        body: {
+          crop: selectedCrop?.name.en || 'General',
+          language,
+          question: question.trim() || undefined,
+        }
+      });
+
+      if (error) {
+        if (error.message?.includes('429')) {
+          toast.error("Too many requests. Please wait a moment.");
+        } else if (error.message?.includes('402')) {
+          toast.error("AI service limit reached.");
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      setAiResponse(data.recommendation);
+    } catch (error) {
+      console.error('Error getting AI advice:', error);
+      toast.error("Failed to get AI recommendation");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -638,6 +708,52 @@ export const FertilizerGuide = () => {
             <span className="font-medium text-sm">{crop.name[language]}</span>
           </button>
         ))}
+      </div>
+
+      {/* AI Advisor Section */}
+      <div className="feature-card bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+        <div className="flex items-center gap-2 mb-4">
+          <Sparkles className="w-6 h-6 text-primary" />
+          <h4 className="text-xl font-bold">{t.askAI}</h4>
+          <span className="text-xs text-muted-foreground ml-auto">{t.poweredBy}</span>
+        </div>
+        
+        <div className="space-y-4">
+          <Textarea
+            placeholder={t.aiPlaceholder}
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            className="min-h-[80px] resize-none"
+          />
+          
+          <Button 
+            onClick={getAIAdvice} 
+            disabled={isLoading}
+            className="w-full"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <MessageSquare className="w-4 h-4 mr-2" />
+                {t.getAdvice}
+              </>
+            )}
+          </Button>
+
+          {aiResponse && (
+            <div className="p-4 bg-card rounded-xl border border-primary/30 animate-slide-up">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <span className="font-bold text-primary">{t.aiRecommendation}</span>
+              </div>
+              <p className="whitespace-pre-wrap leading-relaxed">{aiResponse}</p>
+            </div>
+          )}
+        </div>
       </div>
       
       {selectedCrop && (

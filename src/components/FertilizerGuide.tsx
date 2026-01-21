@@ -660,6 +660,15 @@ export const FertilizerGuide = () => {
       }
 
       setAiResponse(data.recommendation);
+      
+      // Save to database
+      await supabase.from('fertilizer_queries').insert({
+        crop_name: selectedCrop?.name.en || 'General',
+        soil_type: null,
+        question: question.trim() || `Default advice for ${selectedCrop?.name.en}`,
+        ai_response: data.recommendation,
+        language
+      });
     } catch (error) {
       console.error('Error getting AI advice:', error);
       toast.error("Failed to get AI recommendation");

@@ -3,8 +3,8 @@ import { WeatherCard } from "@/components/WeatherCard";
 import { CropCapture } from "@/components/CropCapture";
 import { VoiceAssistant } from "@/components/VoiceAssistant";
 import { FertilizerGuide } from "@/components/FertilizerGuide";
-
-import { Cloud, Sun, Mic, Leaf, ArrowDown } from "lucide-react";
+import { MLFertilizerPredictor } from "@/components/MLFertilizerPredictor";
+import { Cloud, Sun, Mic, Leaf, ArrowDown, Brain } from "lucide-react";
 import farmHero from "@/assets/farm-hero.jpg";
 
 const Index = () => {
@@ -88,6 +88,15 @@ const Index = () => {
         </div>
       </section>
       
+      {/* ML Fertilizer Predictor Section */}
+      <section id="ml-predictor" className="py-16 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <MLFertilizerPredictor />
+          </div>
+        </div>
+      </section>
+
       {/* Fertilizer Guide Section */}
       <section id="fertilizer" className="py-16 bg-background">
         <div className="container mx-auto px-4">

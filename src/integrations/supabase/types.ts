@@ -14,7 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      crops: {
+        Row: {
+          created_at: string
+          crop_name: string
+          expected_harvest_date: string | null
+          farm_id: string | null
+          id: string
+          notes: string | null
+          planting_date: string | null
+          season: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          crop_name: string
+          expected_harvest_date?: string | null
+          farm_id?: string | null
+          id?: string
+          notes?: string | null
+          planting_date?: string | null
+          season?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          crop_name?: string
+          expected_harvest_date?: string | null
+          farm_id?: string | null
+          id?: string
+          notes?: string | null
+          planting_date?: string | null
+          season?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crops_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "farms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      farms: {
+        Row: {
+          area_acres: number | null
+          created_at: string
+          farm_name: string
+          id: string
+          location: string | null
+          soil_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          area_acres?: number | null
+          created_at?: string
+          farm_name: string
+          id?: string
+          location?: string | null
+          soil_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          area_acres?: number | null
+          created_at?: string
+          farm_name?: string
+          id?: string
+          location?: string | null
+          soil_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fertilizer_queries: {
+        Row: {
+          ai_response: string
+          created_at: string
+          crop_name: string
+          id: string
+          language: string | null
+          question: string
+          soil_type: string | null
+        }
+        Insert: {
+          ai_response: string
+          created_at?: string
+          crop_name: string
+          id?: string
+          language?: string | null
+          question: string
+          soil_type?: string | null
+        }
+        Update: {
+          ai_response?: string
+          created_at?: string
+          crop_name?: string
+          id?: string
+          language?: string | null
+          question?: string
+          soil_type?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

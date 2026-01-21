@@ -3,7 +3,7 @@ import { WeatherCard } from "@/components/WeatherCard";
 import { CropCapture } from "@/components/CropCapture";
 import { VoiceAssistant } from "@/components/VoiceAssistant";
 import { FertilizerGuide } from "@/components/FertilizerGuide";
-import { CropShowcase } from "@/components/CropShowcase";
+
 import { Cloud, Sun, Mic, Leaf, ArrowDown } from "lucide-react";
 import farmHero from "@/assets/farm-hero.jpg";
 
@@ -73,8 +73,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Crop Showcase Section */}
-      <CropShowcase />
       
       {/* Crop Capture & Voice Assistant Section */}
       <section id="capture" className="py-16 bg-muted/50">

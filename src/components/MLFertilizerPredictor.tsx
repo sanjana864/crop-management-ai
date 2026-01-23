@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Brain, Leaf, Droplets, ThermometerSun, CloudRain, FlaskConical, AlertTriangle, CheckCircle, TrendingUp } from "lucide-react";
+import { Brain, Leaf, Droplets, ThermometerSun, CloudRain, FlaskConical, AlertTriangle, CheckCircle, TrendingUp, Server } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -12,17 +12,39 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { 
-  predictFertilizer, 
-  getFertilizerProducts,
-  type MLInput, 
-  type MLPrediction,
-  type SoilType,
-  type GrowthStage,
-  type WeatherCondition
-} from "@/lib/fertilizerML";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+// Types for ML prediction
+type SoilType = 'clay' | 'sandy' | 'loamy' | 'black' | 'red' | 'alluvial';
+type GrowthStage = 'seedling' | 'vegetative' | 'flowering' | 'fruiting' | 'maturity';
+type WeatherCondition = 'dry' | 'moderate' | 'rainy' | 'humid';
+
+interface MLInput {
+  crop: string;
+  soilType: SoilType;
+  growthStage: GrowthStage;
+  weather: WeatherCondition;
+  temperature: number;
+  rainfall: number;
+  areaAcres: number;
+}
+
+interface MLPrediction {
+  nitrogen: number;
+  phosphorus: number;
+  potassium: number;
+  confidence: number;
+  applicationMethod: string;
+  timing: string;
+  warnings: string[];
+}
+
+interface FertilizerProduct {
+  name: string;
+  npkContent: string;
+  quantity: string;
+}
 
 const crops = ['Rice', 'Wheat', 'Cotton', 'Tomato', 'Sugarcane', 'Potato', 'Maize', 'Groundnut'];
 const soilTypes: { value: SoilType; label: string }[] = [
@@ -58,6 +80,7 @@ export const MLFertilizerPredictor = () => {
     areaAcres: 1,
   });
   const [prediction, setPrediction] = useState<MLPrediction | null>(null);
+  const [products, setProducts] = useState<FertilizerProduct[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
 
   const handlePredict = async () => {
@@ -68,30 +91,36 @@ export const MLFertilizerPredictor = () => {
 
     setIsCalculating(true);
     
-    // Simulate ML processing time
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    const result = predictFertilizer(input as MLInput);
-    setPrediction(result);
-
-    // Save prediction to database
     try {
+      // Call the backend ML edge function
+      const { data, error } = await supabase.functions.invoke('ml-fertilizer', {
+        body: input as MLInput
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setPrediction(data.prediction);
+      setProducts(data.products);
+
+      // Save prediction to database
       await supabase.from('fertilizer_queries').insert({
         crop_name: input.crop,
         soil_type: input.soilType,
         question: `ML Prediction: ${input.growthStage} stage, ${input.weather} weather, ${input.temperature}°C`,
-        ai_response: JSON.stringify(result),
+        ai_response: JSON.stringify(data.prediction),
         language: 'en'
       });
+
+      toast.success("ML prediction complete from backend!");
     } catch (error) {
-      console.error('Failed to save prediction:', error);
+      console.error('ML prediction error:', error);
+      toast.error("Failed to get prediction. Please try again.");
+    } finally {
+      setIsCalculating(false);
     }
-
-    setIsCalculating(false);
-    toast.success("ML prediction complete!");
   };
-
-  const products = prediction ? getFertilizerProducts(prediction) : [];
 
   return (
     <div className="space-y-6">
@@ -99,10 +128,11 @@ export const MLFertilizerPredictor = () => {
         <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4">
           <Brain className="w-5 h-5 text-primary" />
           <span className="font-medium text-primary">ML-Powered Prediction</span>
+          <Server className="w-4 h-4 text-muted-foreground" />
         </div>
         <h3 className="text-2xl font-bold mb-2">Fertilizer Predictor</h3>
         <p className="text-muted-foreground">
-          Decision Tree + Weighted Scoring Algorithm
+          Server-side Decision Tree + Weighted Scoring Algorithm
         </p>
       </div>
 

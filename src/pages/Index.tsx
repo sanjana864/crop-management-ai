@@ -4,7 +4,8 @@ import { CropCapture } from "@/components/CropCapture";
 import { VoiceAssistant } from "@/components/VoiceAssistant";
 import { FertilizerGuide } from "@/components/FertilizerGuide";
 import { MLFertilizerPredictor } from "@/components/MLFertilizerPredictor";
-import { Cloud, Sun, Mic, Leaf, ArrowDown, Brain } from "lucide-react";
+import { WorkflowStep } from "@/components/WorkflowStep";
+import { Cloud, Sun, Mic, Leaf, ArrowDown, Brain, Camera, FlaskConical, BookOpen, ChevronDown } from "lucide-react";
 import farmHero from "@/assets/farm-hero.jpg";
 
 const Index = () => {
@@ -29,54 +30,114 @@ const Index = () => {
           </h1>
           
           <p className="text-xl md:text-2xl text-primary-foreground/90 max-w-2xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-            Your Smart Farming Companion - Weather alerts, crop analysis, and expert guidance in your language
+            Your Smart Farming Companion - Follow the steps below for expert guidance
           </p>
           
           <div className="flex flex-wrap justify-center gap-4 mb-12 animate-slide-up" style={{ animationDelay: "0.2s" }}>
             <div className="flex items-center gap-2 bg-primary-foreground/20 backdrop-blur-sm px-4 py-2 rounded-full">
               <Sun className="w-5 h-5 text-harvest" />
-              <span className="text-primary-foreground font-medium">Weather Alerts</span>
+              <span className="text-primary-foreground font-medium">Step 1: Weather</span>
             </div>
             <div className="flex items-center gap-2 bg-primary-foreground/20 backdrop-blur-sm px-4 py-2 rounded-full">
-              <Mic className="w-5 h-5 text-accent" />
-              <span className="text-primary-foreground font-medium">Voice in 9+ Languages</span>
+              <Camera className="w-5 h-5 text-accent" />
+              <span className="text-primary-foreground font-medium">Step 2: Crop Analysis</span>
             </div>
             <div className="flex items-center gap-2 bg-primary-foreground/20 backdrop-blur-sm px-4 py-2 rounded-full">
-              <Leaf className="w-5 h-5 text-growth" />
-              <span className="text-primary-foreground font-medium">Fertilizer Guide</span>
+              <Brain className="w-5 h-5 text-growth" />
+              <span className="text-primary-foreground font-medium">Step 3: ML Predictor</span>
+            </div>
+            <div className="flex items-center gap-2 bg-primary-foreground/20 backdrop-blur-sm px-4 py-2 rounded-full">
+              <BookOpen className="w-5 h-5 text-sky" />
+              <span className="text-primary-foreground font-medium">Step 4: Guide</span>
             </div>
           </div>
           
           <a 
-            href="#weather" 
+            href="#workflow" 
             className="inline-flex items-center gap-2 btn-farmer bg-primary text-primary-foreground animate-float"
           >
-            Get Started <ArrowDown className="w-5 h-5" />
+            Start Workflow <ArrowDown className="w-5 h-5" />
           </a>
         </div>
       </section>
+
+      {/* Workflow Overview */}
+      <section id="workflow" className="py-16 bg-muted/30">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2">How It Works</h2>
+            <p className="text-muted-foreground">Follow these 4 simple steps for smart farming</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-x-8">
+            <WorkflowStep
+              step={1}
+              title="Check Weather"
+              description="Get real-time weather & harvest recommendations for your location."
+              icon={<Cloud className="w-6 h-6" />}
+            />
+            <WorkflowStep
+              step={2}
+              title="Analyze Your Crop"
+              description="Capture or upload a photo for disease detection, or ask voice questions."
+              icon={<Camera className="w-6 h-6" />}
+            />
+            <WorkflowStep
+              step={3}
+              title="ML Fertilizer Prediction"
+              description="Enter crop & soil details to get precise NPK recommendations."
+              icon={<Brain className="w-6 h-6" />}
+            />
+            <WorkflowStep
+              step={4}
+              title="Read Fertilizer Guide"
+              description="Browse detailed guides for your specific crop and soil type."
+              icon={<BookOpen className="w-6 h-6" />}
+              isLast
+            />
+          </div>
+          <div className="text-center mt-8">
+            <a href="#weather" className="inline-flex items-center gap-2 text-primary font-semibold hover:underline">
+              Begin Step 1 <ChevronDown className="w-5 h-5" />
+            </a>
+          </div>
+        </div>
+      </section>
       
-      {/* Weather Section */}
+      {/* Step 1: Weather Section */}
       <section id="weather" className="py-16 bg-background">
         <div className="container mx-auto px-4">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 bg-sky-light px-4 py-2 rounded-full mb-4">
+            <div className="inline-flex items-center gap-2 bg-sky/10 px-4 py-2 rounded-full mb-4">
+              <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">1</div>
               <Cloud className="w-5 h-5 text-sky" />
-              <span className="font-medium text-sky">Today's Weather</span>
+              <span className="font-medium text-sky">Check Weather</span>
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold">Harvest Recommendation</h2>
-            <p className="text-muted-foreground mt-2">Real-time weather analysis for your farm</p>
+            <h2 className="text-3xl md:text-4xl font-bold">Weather & Harvest Recommendation</h2>
+            <p className="text-muted-foreground mt-2">Real-time weather analysis for your farm location</p>
           </div>
           <div className="max-w-3xl mx-auto">
             <WeatherCard />
           </div>
+          <div className="text-center mt-8">
+            <a href="#capture" className="inline-flex items-center gap-2 text-primary font-semibold hover:underline">
+              Next: Crop Analysis <ChevronDown className="w-5 h-5" />
+            </a>
+          </div>
         </div>
       </section>
 
-      
-      {/* Crop Capture & Voice Assistant Section */}
+      {/* Step 2: Crop Capture & Voice Assistant Section */}
       <section id="capture" className="py-16 bg-muted/50">
         <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 bg-accent/10 px-4 py-2 rounded-full mb-4">
+              <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">2</div>
+              <Camera className="w-5 h-5 text-accent" />
+              <span className="font-medium text-accent">Analyze Crop & Ask Questions</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold">Crop Analysis & Voice Help</h2>
+            <p className="text-muted-foreground mt-2">Upload a crop photo or ask questions in your language</p>
+          </div>
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             <div>
               <CropCapture />
@@ -85,21 +146,47 @@ const Index = () => {
               <VoiceAssistant />
             </div>
           </div>
+          <div className="text-center mt-8">
+            <a href="#ml-predictor" className="inline-flex items-center gap-2 text-primary font-semibold hover:underline">
+              Next: ML Fertilizer Predictor <ChevronDown className="w-5 h-5" />
+            </a>
+          </div>
         </div>
       </section>
       
-      {/* ML Fertilizer Predictor Section */}
-      <section id="ml-predictor" className="py-16 bg-muted/30">
+      {/* Step 3: ML Fertilizer Predictor Section */}
+      <section id="ml-predictor" className="py-16 bg-background">
         <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4">
+              <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">3</div>
+              <Brain className="w-5 h-5 text-primary" />
+              <span className="font-medium text-primary">ML-Powered Prediction</span>
+            </div>
+          </div>
           <div className="max-w-4xl mx-auto">
             <MLFertilizerPredictor />
+          </div>
+          <div className="text-center mt-8">
+            <a href="#fertilizer" className="inline-flex items-center gap-2 text-primary font-semibold hover:underline">
+              Next: Fertilizer Guide <ChevronDown className="w-5 h-5" />
+            </a>
           </div>
         </div>
       </section>
 
-      {/* Fertilizer Guide Section */}
-      <section id="fertilizer" className="py-16 bg-background">
+      {/* Step 4: Fertilizer Guide Section */}
+      <section id="fertilizer" className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 bg-growth/10 px-4 py-2 rounded-full mb-4">
+              <div className="w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm">4</div>
+              <BookOpen className="w-5 h-5 text-growth" />
+              <span className="font-medium text-growth">Fertilizer Guide</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold">Detailed Fertilizer Guide</h2>
+            <p className="text-muted-foreground mt-2">Comprehensive crop-specific fertilizer recommendations</p>
+          </div>
           <FertilizerGuide />
         </div>
       </section>

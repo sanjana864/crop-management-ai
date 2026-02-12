@@ -30,27 +30,8 @@ const Index = () => {
           </h1>
           
           <p className="text-xl md:text-2xl text-primary-foreground/90 max-w-2xl mx-auto mb-8 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-            Your Smart Farming Companion - Follow the steps below for expert guidance
+            Your Smart Farming Companion
           </p>
-          
-          <div className="flex flex-wrap justify-center gap-4 mb-12 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-            <div className="flex items-center gap-2 bg-primary-foreground/20 backdrop-blur-sm px-4 py-2 rounded-full">
-              <Sun className="w-5 h-5 text-harvest" />
-              <span className="text-primary-foreground font-medium">Step 1: Weather</span>
-            </div>
-            <div className="flex items-center gap-2 bg-primary-foreground/20 backdrop-blur-sm px-4 py-2 rounded-full">
-              <Camera className="w-5 h-5 text-accent" />
-              <span className="text-primary-foreground font-medium">Step 2: Crop Analysis</span>
-            </div>
-            <div className="flex items-center gap-2 bg-primary-foreground/20 backdrop-blur-sm px-4 py-2 rounded-full">
-              <Brain className="w-5 h-5 text-growth" />
-              <span className="text-primary-foreground font-medium">Step 3: ML Predictor</span>
-            </div>
-            <div className="flex items-center gap-2 bg-primary-foreground/20 backdrop-blur-sm px-4 py-2 rounded-full">
-              <BookOpen className="w-5 h-5 text-sky" />
-              <span className="text-primary-foreground font-medium">Step 4: Guide</span>
-            </div>
-          </div>
           
           <a 
             href="#workflow" 

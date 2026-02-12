@@ -37,7 +37,7 @@ const Index = () => {
             href="#workflow" 
             className="inline-flex items-center gap-2 btn-farmer bg-primary text-primary-foreground animate-float"
           >
-            Start Workflow <ArrowDown className="w-5 h-5" />
+            Get Started <ArrowDown className="w-5 h-5" />
           </a>
         </div>
       </section>

@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: URL: https://crop-whisperer-ai
+**URL**:https://crop-whisperer-ai
 
 ## How can I edit this code?
 

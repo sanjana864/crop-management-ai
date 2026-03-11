@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://crop-whisperer-ai
+**URL**: https://preview--crop-management-ai-25.lovable.app
 
 ## How can I edit this code?
 

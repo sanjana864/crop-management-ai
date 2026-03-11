@@ -1,12 +1,14 @@
 import { useState, useRef } from "react";
 import { Camera, Upload, X, CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export const CropCapture = () => {
   const [image, setImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { t } = useLanguage();
 
   const handleCapture = () => {
     fileInputRef.current?.click();
@@ -27,10 +29,9 @@ export const CropCapture = () => {
   const analyzeImage = () => {
     setIsAnalyzing(true);
     setAnalysis(null);
-    // Simulated analysis - in production, this would use AI
     setTimeout(() => {
       setIsAnalyzing(false);
-      setAnalysis("🌾 Crop appears healthy! Good moisture levels detected. Recommended action: Continue regular watering schedule. Estimated time to harvest: 2-3 weeks.");
+      setAnalysis(t('cropHealthy'));
     }, 2000);
   };
 
@@ -46,7 +47,7 @@ export const CropCapture = () => {
     <div className="feature-card">
       <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
         <Camera className="w-6 h-6 text-primary" />
-        Crop Image Analysis
+        {t('cropImageAnalysis')}
       </h3>
       
       <input
@@ -66,14 +67,14 @@ export const CropCapture = () => {
           <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
             <Camera className="w-8 h-8 text-primary" />
           </div>
-          <p className="text-lg font-semibold text-center">Tap to Capture Crop Image</p>
-          <p className="text-muted-foreground text-center mt-1">or upload from gallery</p>
+          <p className="text-lg font-semibold text-center">{t('tapToCapture')}</p>
+          <p className="text-muted-foreground text-center mt-1">{t('orUpload')}</p>
           <div className="flex gap-3 mt-4">
             <Button variant="outline" size="lg" className="gap-2">
-              <Camera className="w-5 h-5" /> Camera
+              <Camera className="w-5 h-5" /> {t('camera')}
             </Button>
             <Button variant="outline" size="lg" className="gap-2">
-              <Upload className="w-5 h-5" /> Upload
+              <Upload className="w-5 h-5" /> {t('upload')}
             </Button>
           </div>
         </div>
@@ -96,20 +97,20 @@ export const CropCapture = () => {
           {isAnalyzing ? (
             <div className="flex items-center justify-center gap-3 p-4 bg-muted rounded-xl">
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
-              <span className="font-medium">Analyzing your crop...</span>
+              <span className="font-medium">{t('analyzingCrop')}</span>
             </div>
           ) : analysis ? (
             <div className="p-4 bg-growth-light border-2 border-growth rounded-xl">
               <div className="flex items-center gap-2 mb-2">
                 <CheckCircle className="w-5 h-5 text-growth" />
-                <span className="font-bold">Analysis Complete</span>
+                <span className="font-bold">{t('analysisComplete')}</span>
               </div>
               <p className="text-foreground">{analysis}</p>
             </div>
           ) : null}
           
           <Button onClick={handleCapture} className="w-full btn-farmer bg-primary text-primary-foreground">
-            <Camera className="w-5 h-5 mr-2" /> Capture New Image
+            <Camera className="w-5 h-5 mr-2" /> {t('captureNew')}
           </Button>
         </div>
       )}

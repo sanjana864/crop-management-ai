@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 // Web Speech API types
 interface SpeechRecognitionEvent extends Event {
@@ -37,7 +38,8 @@ declare global {
     webkitSpeechRecognition: new () => SpeechRecognitionInstance;
   }
 }
-const languages = [
+
+const speechLanguages = [
   { code: "en-US", name: "English", flag: "🇬🇧" },
   { code: "hi-IN", name: "हिंदी (Hindi)", flag: "🇮🇳" },
   { code: "te-IN", name: "తెలుగు (Telugu)", flag: "🇮🇳" },
@@ -86,170 +88,217 @@ const responses: Record<string, Record<string, string>> = {
   "ta-IN": {
     rice_plant: "நெல் பயிரிட சிறந்த காலம் மழைக்காலம் (ஜூன்-ஜூலை). நாற்றங்கால் படுக்கைகளை நடவு செய்வதற்கு 25-30 நாட்களுக்கு முன் தயார் செய்யுங்கள். நெல் வயல்களில் 2-3 அங்குல நீரை பராமரிக்கவும்.",
     rice_harvest: "தானியங்கள் தங்க மஞ்சள் நிறமாகவும், ஈரப்பதம் 20-25% ஆகவும் மாறும்போது நெல் அறுவடைக்கு தயாராகிறது. பூக்கும் காலத்திற்கு 30-35 நாட்களுக்குப் பிறகு அறுவடை செய்யுங்கள்.",
-    rice_general: "நெல்லுக்கு 1200-1500 மி.மீ. தண்ணீர் தேவை. சிறந்த விளைச்சலுக்கு SRI முறையைப் பயன்படுத்துங்கள். ஹெக்டேருக்கு 120 கிலோ நைட்ரஜன், 60 கிலோ பாஸ்பரஸ், 40 கிலோ பொட்டாசியம் பயன்படுத்துங்கள்.",
-    wheat_plant: "கோதுமை விதைக்கும் காலம் நவம்பர்-டிசம்பர். ஹெக்டேருக்கு 100-125 கிலோ விதைகளைப் பயன்படுத்துங்கள். சிறந்த வளர்ச்சிக்கு 20-22.5 செ.மீ. வரிசை இடைவெளியை பராமரிக்கவும்.",
-    wheat_harvest: "தானியங்கள் கடினமாகவும் தங்க நிறமாகவும் இருக்கும்போது கோதுமை தயாராகிறது. 12-14% ஈரப்பதத்தில் அறுவடை செய்யுங்கள்.",
-    wheat_general: "கோதுமைக்கு 4-6 பாசனங்கள் தேவை. முதல் பாசனம் கிரீடம் வேர் நிலையில் (21 நாட்கள்), இரண்டாவது பட்டையிடும் நிலையில்.",
-    sugarcane_plant: "கரும்பை பிப்ரவரி-மார்ச் அல்லது செப்டம்பர்-அக்டோபரில் நடவும். நோயில்லாத கரும்பிலிருந்து 3 கண் செட்டுகளைப் பயன்படுத்துங்கள்.",
-    sugarcane_harvest: "கரும்பு 10-12 மாதங்களில் முதிர்ச்சியடைகிறது. பிரிக்ஸ் அளவீடு 18-20% ஆக இருக்கும்போது அறுவடை செய்யுங்கள்.",
-    sugarcane_general: "கரும்புக்கு ஒவ்வொரு 7-10 நாட்களுக்கும் தொடர்ந்து பாசனம் தேவை. 90 மற்றும் 120 நாட்களில் மண் அணைத்தல் அவசியம்.",
-    cotton_plant: "பருத்தி மே-ஜூன் மாதங்களில் மழைக்காலத் தொடக்கத்தில் விதைக்கப்படுகிறது. ஹெக்டேருக்கு 2-2.5 கிலோ விதைகளைப் பயன்படுத்துங்கள்.",
+    rice_general: "நெல்லுக்கு 1200-1500 மி.மீ. தண்ணீர் தேவை. சிறந்த விளைச்சலுக்கு SRI முறையைப் பயன்படுத்துங்கள்.",
+    wheat_plant: "கோதுமை விதைக்கும் காலம் நவம்பர்-டிசம்பர். ஹெக்டேருக்கு 100-125 கிலோ விதைகளைப் பயன்படுத்துங்கள்.",
+    wheat_harvest: "தானியங்கள் கடினமாகவும் தங்க நிறமாகவும் இருக்கும்போது கோதுமை தயாராகிறது.",
+    wheat_general: "கோதுமைக்கு 4-6 பாசனங்கள் தேவை.",
+    sugarcane_plant: "கரும்பை பிப்ரவரி-மார்ச் அல்லது செப்டம்பர்-அக்டோபரில் நடவும்.",
+    sugarcane_harvest: "கரும்பு 10-12 மாதங்களில் முதிர்ச்சியடைகிறது.",
+    sugarcane_general: "கரும்புக்கு ஒவ்வொரு 7-10 நாட்களுக்கும் தொடர்ந்து பாசனம் தேவை.",
+    cotton_plant: "பருத்தி மே-ஜூன் மாதங்களில் மழைக்காலத் தொடக்கத்தில் விதைக்கப்படுகிறது.",
     cotton_pest: "காய்ப்புழு கட்டுப்பாட்டிற்கு, பெரோமோன் பொறிகள் மற்றும் வேப்ப அடிப்படையிலான தெளிப்புகளைப் பயன்படுத்துங்கள்.",
-    cotton_general: "பருத்திக்கு 700-1200 மி.மீ. தண்ணீர் தேவை. காய்கள் முழுமையாக திறக்கும்போது பருத்தியை எடுங்கள்.",
-    tomato_plant: "25-30 நாள் வயதுள்ள தக்காளி நாற்றுகளை நடவும். செடிகளை 60x45 செ.மீ. இடைவெளியில் வைக்கவும்.",
-    tomato_disease: "பிந்தைய அழுகலுக்கு, தாமிர அடிப்படையிலான பூஞ்சைக் கொல்லிகளைப் பயன்படுத்துங்கள். பாதிக்கப்பட்ட இலைகளை உடனடியாக அகற்றவும்.",
-    tomato_general: "தக்காளிக்கு 600-800 மி.மீ. தண்ணீர் தேவை. பழங்கள் சிவப்பாக மாறும்போது அறுவடை செய்யுங்கள்.",
-    maize_plant: "மக்காச்சோளத்தை காரிஃப்புக்கு ஜூன்-ஜூலையிலும், ரபிக்கு ஜனவரி-பிப்ரவரியிலும் விதைக்கவும். ஹெக்டேருக்கு 20-25 கிலோ விதைகளைப் பயன்படுத்துங்கள்.",
+    cotton_general: "பருத்திக்கு 700-1200 மி.மீ. தண்ணீர் தேவை.",
+    tomato_plant: "25-30 நாள் வயதுள்ள தக்காளி நாற்றுகளை நடவும்.",
+    tomato_disease: "பிந்தைய அழுகலுக்கு, தாமிர அடிப்படையிலான பூஞ்சைக் கொல்லிகளைப் பயன்படுத்துங்கள்.",
+    tomato_general: "தக்காளிக்கு 600-800 மி.மீ. தண்ணீர் தேவை.",
+    maize_plant: "மக்காச்சோளத்தை காரிஃப்புக்கு ஜூன்-ஜூலையிலும், ரபிக்கு ஜனவரி-பிப்ரவரியிலும் விதைக்கவும்.",
     maize_harvest: "உறைகள் பழுப்பு நிறமாகவும், கர்னல்கள் கடினமாகவும் மாறும்போது மக்காச்சோளம் தயாராகிறது.",
-    maize_general: "மக்காச்சோளத்திற்கு 500-600 மி.மீ. தண்ணீர் தேவை. நைட்ரஜனை 3 தவணைகளில் பயன்படுத்துங்கள்.",
-    irrigation: "சிறந்த பாசனத்திற்கு, ஆவியாகுதலை குறைக்க அதிகாலை அல்லது மாலையில் பயிர்களுக்கு தண்ணீர் ஊற்றவும். 30-40% தண்ணீரை சேமிக்க சொட்டு நீர் பாசனத்தைப் பயன்படுத்துங்கள்.",
-    pest: "ஒருங்கிணைந்த பூச்சி மேலாண்மைக்கு: கண்காணிப்புக்கு பெரோமோன் பொறிகள், இயற்கை வேட்டையாடிகளை விடுதல், வாராந்திர வேப்ப எண்ணெய் தெளிப்பு பயன்படுத்துங்கள்.",
-    disease: "நோய் கட்டுப்பாட்டிற்கு: பாதிக்கப்பட்ட செடிகளை உடனடியாக அகற்றவும், தாமிர அடிப்படையிலான பூஞ்சைக் கொல்லிகளைப் பயன்படுத்துங்கள், சரியான வடிகால் உறுதி செய்யவும்.",
-    fertilizer: "மண் பரிசோதனையின் அடிப்படையில் உரங்களைப் பயன்படுத்துங்கள். பெரும்பாலான பயிர்களுக்கு பொதுவான NPK விகிதம் 4:2:1. ஹெக்டேருக்கு 2-3 டன் தொழு உரம் பயன்படுத்துங்கள்.",
-    weather: "தினமும் வானிலை முன்னறிவிப்புகளை கண்காணிக்கவும். மழைக்கு முன் உர பயன்பாட்டை தாமதப்படுத்துங்கள். பருவமழைக்கு முன் வடிகால் கால்வாய்களை தயார் செய்யுங்கள்.",
-    seed: "அங்கீகரிக்கப்பட்ட விற்பனையாளர்களிடமிருந்து சான்றளிக்கப்பட்ட விதைகளைப் பயன்படுத்துங்கள். விதைப்பதற்கு முன் விதைகளை திராம் அல்லது கார்பெண்டாசிம் கொண்டு சிகிச்சையளிக்கவும்.",
-    soil: "pH மற்றும் ஊட்டச்சத்துக்களுக்கு ஒவ்வொரு 2-3 ஆண்டுகளுக்கும் மண்ணை பரிசோதிக்கவும். pH 6.0க்கு கீழே இருந்தால் சுண்ணாம்பு சேர்க்கவும்.",
-    market: "தினசரி மண்டி விலைகளுக்கு AGMARKNET போர்ட்டலைப் பாருங்கள். விவசாயிகள் உற்பத்தியாளர் நிறுவனங்கள் மூலம் நேரடி விற்பனையைக் கருத்தில் கொள்ளுங்கள்.",
-    scheme: "எளிதான கடன்களுக்கு கிசான் கிரெடிட் கார்டுக்கு விண்ணப்பிக்கவும். நேரடி வருமான ஆதரவுக்கு PM-KISAN திட்டத்தைப் பாருங்கள்.",
-    hello: "வணக்கம்! நான் உங்கள் விவசாய உதவியாளர். பயிர் சாகுபடி, பாசனம், பூச்சி கட்டுப்பாடு, உரங்கள், வானிலை வழிகாட்டுதல், சந்தை விலைகள் அல்லது அரசு திட்டங்கள் பற்றி கேளுங்கள். இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?",
-    thanks: "நன்றி! விவசாயம் பற்றி மேலும் கேள்விகள் கேட்க தயங்காதீர்கள். சிறந்த பயிர்களை வளர்க்க உங்களுக்கு உதவ நான் இங்கே இருக்கிறேன்.",
-    default: "குறிப்பிட்ட பயிர்கள் (நெல், கோதுமை, பருத்தி, கரும்பு, தக்காளி, மக்காச்சோளம்), பாசனம், பூச்சி கட்டுப்பாடு, உரங்கள், மண் ஆரோக்கியம், வானிலை, சந்தை விலைகள் மற்றும் அரசு திட்டங்கள் பற்றிய விவசாய கேள்விகளுக்கு நான் உதவ முடியும். ஒரு குறிப்பிட்ட கேள்வியைக் கேளுங்கள்!"
+    maize_general: "மக்காச்சோளத்திற்கு 500-600 மி.மீ. தண்ணீர் தேவை.",
+    irrigation: "சிறந்த பாசனத்திற்கு, ஆவியாகுதலை குறைக்க அதிகாலை அல்லது மாலையில் பயிர்களுக்கு தண்ணீர் ஊற்றவும்.",
+    pest: "ஒருங்கிணைந்த பூச்சி மேலாண்மைக்கு: கண்காணிப்புக்கு பெரோமோன் பொறிகள் பயன்படுத்துங்கள்.",
+    disease: "நோய் கட்டுப்பாட்டிற்கு: பாதிக்கப்பட்ட செடிகளை உடனடியாக அகற்றவும்.",
+    fertilizer: "மண் பரிசோதனையின் அடிப்படையில் உரங்களைப் பயன்படுத்துங்கள்.",
+    weather: "தினமும் வானிலை முன்னறிவிப்புகளை கண்காணிக்கவும்.",
+    seed: "அங்கீகரிக்கப்பட்ட விற்பனையாளர்களிடமிருந்து சான்றளிக்கப்பட்ட விதைகளைப் பயன்படுத்துங்கள்.",
+    soil: "pH மற்றும் ஊட்டச்சத்துக்களுக்கு ஒவ்வொரு 2-3 ஆண்டுகளுக்கும் மண்ணை பரிசோதிக்கவும்.",
+    market: "தினசரி மண்டி விலைகளுக்கு AGMARKNET போர்ட்டலைப் பாருங்கள்.",
+    scheme: "எளிதான கடன்களுக்கு கிசான் கிரெடிட் கார்டுக்கு விண்ணப்பிக்கவும்.",
+    hello: "வணக்கம்! நான் உங்கள் விவசாய உதவியாளர். பயிர் சாகுபடி, பாசனம், பூச்சி கட்டுப்பாடு, உரங்கள், வானிலை வழிகாட்டுதல் பற்றி கேளுங்கள்.",
+    thanks: "நன்றி! விவசாயம் பற்றி மேலும் கேள்விகள் கேட்க தயங்காதீர்கள்.",
+    default: "குறிப்பிட்ட பயிர்கள், பாசனம், பூச்சி கட்டுப்பாடு, உரங்கள், மண் ஆரோக்கியம் பற்றிய விவசாய கேள்விகளுக்கு நான் உதவ முடியும்."
   },
   "hi-IN": {
-    rice_plant: "धान की रोपाई के लिए सबसे अच्छा समय मानसून (जून-जुलाई) है। रोपाई से 25-30 दिन पहले नर्सरी बेड तैयार करें। धान के खेतों में 2-3 इंच पानी बनाए रखें।",
-    rice_harvest: "जब दाने सुनहरे पीले हो जाएं और नमी 20-25% हो तो धान कटाई के लिए तैयार है। फूल आने के 30-35 दिन बाद कटाई करें।",
-    rice_general: "धान को 1200-1500 मिमी पानी चाहिए। बेहतर उपज के लिए SRI विधि का उपयोग करें। प्रति हेक्टेयर 120 किलो नाइट्रोजन, 60 किलो फॉस्फोरस, 40 किलो पोटाश डालें।",
-    wheat_plant: "गेहूं की बुवाई का समय नवंबर-दिसंबर है। प्रति हेक्टेयर 100-125 किलो बीज का प्रयोग करें। बेहतर विकास के लिए 20-22.5 सेमी पंक्ति अंतर रखें।",
-    wheat_harvest: "जब दाने कड़े और सुनहरे हों तो गेहूं तैयार है। 12-14% नमी पर कटाई करें।",
-    wheat_general: "गेहूं को 4-6 सिंचाई चाहिए। पहली सिंचाई जड़ अवस्था में (21 दिन), दूसरी कल्ले निकलते समय।",
-    irrigation: "सर्वोत्तम सिंचाई के लिए, वाष्पीकरण कम करने के लिए सुबह जल्दी या शाम को पानी दें। 30-40% पानी बचाने के लिए ड्रिप सिंचाई का उपयोग करें।",
-    pest: "एकीकृत कीट प्रबंधन के लिए: निगरानी के लिए फेरोमोन ट्रैप, प्राकृतिक शिकारियों को छोड़ें, साप्ताहिक नीम तेल स्प्रे करें।",
-    disease: "रोग नियंत्रण के लिए: संक्रमित पौधों को तुरंत हटाएं, तांबा आधारित फफूंदनाशक लगाएं, उचित जल निकासी सुनिश्चित करें।",
-    fertilizer: "मिट्टी परीक्षण के आधार पर उर्वरक डालें। अधिकांश फसलों के लिए सामान्य NPK अनुपात 4:2:1 है। प्रति हेक्टेयर 2-3 टन जैविक खाद का उपयोग करें।",
-    weather: "रोजाना मौसम पूर्वानुमान देखें। बारिश से पहले उर्वरक देना टालें। मानसून से पहले नालियां तैयार करें।",
-    seed: "अधिकृत डीलरों से प्रमाणित बीज का उपयोग करें। बुवाई से पहले बीजों को थीरम या कार्बेंडाजिम से उपचारित करें।",
-    soil: "pH और पोषक तत्वों के लिए हर 2-3 साल में मिट्टी की जांच करें। pH 6.0 से कम हो तो चूना डालें।",
-    market: "दैनिक मंडी भाव के लिए AGMARKNET पोर्टल देखें। किसान उत्पादक संगठनों के माध्यम से सीधी बिक्री पर विचार करें।",
-    scheme: "आसान ऋण के लिए किसान क्रेडिट कार्ड के लिए आवेदन करें। प्रत्यक्ष आय सहायता के लिए PM-KISAN योजना देखें।",
-    hello: "नमस्ते! मैं आपका कृषि सहायक हूं। फसल खेती, सिंचाई, कीट नियंत्रण, उर्वरक, मौसम मार्गदर्शन, बाजार भाव या सरकारी योजनाओं के बारे में पूछें। आज मैं आपकी कैसे मदद कर सकता हूं?",
-    thanks: "धन्यवाद! खेती के बारे में और सवाल पूछने में संकोच न करें। मैं आपकी बेहतर फसल उगाने में मदद के लिए यहां हूं।",
-    default: "मैं विशिष्ट फसलों (धान, गेहूं, कपास, गन्ना, टमाटर, मक्का), सिंचाई, कीट नियंत्रण, उर्वरक, मिट्टी स्वास्थ्य, मौसम, बाजार भाव और सरकारी योजनाओं के बारे में मदद कर सकता हूं। कृपया एक विशिष्ट प्रश्न पूछें!"
+    rice_plant: "धान की रोपाई के लिए सबसे अच्छा समय मानसून (जून-जुलाई) है। रोपाई से 25-30 दिन पहले नर्सरी बेड तैयार करें।",
+    rice_harvest: "जब दाने सुनहरे पीले हो जाएं और नमी 20-25% हो तो धान कटाई के लिए तैयार है।",
+    rice_general: "धान को 1200-1500 मिमी पानी चाहिए। बेहतर उपज के लिए SRI विधि का उपयोग करें।",
+    wheat_plant: "गेहूं की बुवाई का समय नवंबर-दिसंबर है।",
+    wheat_harvest: "जब दाने कड़े और सुनहरे हों तो गेहूं तैयार है।",
+    wheat_general: "गेहूं को 4-6 सिंचाई चाहिए।",
+    sugarcane_plant: "गन्ना फरवरी-मार्च या सितंबर-अक्टूबर में लगाएं।",
+    sugarcane_harvest: "गन्ना 10-12 महीने में तैयार होता है।",
+    sugarcane_general: "गन्ने को हर 7-10 दिन सिंचाई चाहिए।",
+    cotton_plant: "कपास मई-जून में मानसून की शुरुआत में बोई जाती है।",
+    cotton_pest: "बॉलवर्म नियंत्रण के लिए फेरोमोन ट्रैप और नीम स्प्रे का उपयोग करें।",
+    cotton_general: "कपास को 700-1200 मिमी पानी चाहिए।",
+    tomato_plant: "25-30 दिन पुरानी टमाटर की पौध रोपें।",
+    tomato_disease: "लेट ब्लाइट के लिए कॉपर आधारित फंगीसाइड लगाएं।",
+    tomato_general: "टमाटर को 600-800 मिमी पानी चाहिए।",
+    maize_plant: "मक्का खरीफ के लिए जून-जुलाई में बोएं।",
+    maize_harvest: "जब भुट्टे भूरे और दाने कड़े हों तो मक्का तैयार है।",
+    maize_general: "मक्का को 500-600 मिमी पानी चाहिए।",
+    irrigation: "इष्टतम सिंचाई के लिए सुबह या शाम को पानी दें।",
+    pest: "एकीकृत कीट प्रबंधन के लिए फेरोमोन ट्रैप का उपयोग करें।",
+    disease: "रोग नियंत्रण के लिए संक्रमित पौधों को तुरंत हटाएं।",
+    fertilizer: "मिट्टी परीक्षण के आधार पर उर्वरक डालें।",
+    weather: "दैनिक मौसम पूर्वानुमान देखें।",
+    seed: "अधिकृत डीलरों से प्रमाणित बीज खरीदें।",
+    soil: "हर 2-3 साल में मिट्टी का परीक्षण करें।",
+    market: "दैनिक मंडी भावों के लिए AGMARKNET पोर्टल देखें।",
+    scheme: "आसान ऋण के लिए किसान क्रेडिट कार्ड के लिए आवेदन करें।",
+    hello: "नमस्ते! मैं आपका कृषि सहायक हूं। फसल खेती, सिंचाई, कीट नियंत्रण, उर्वरक, मौसम के बारे में पूछें।",
+    thanks: "धन्यवाद! खेती के बारे में और प्रश्न पूछने में संकोच न करें।",
+    default: "मैं विशिष्ट फसलों, सिंचाई, कीट नियंत्रण, उर्वरक, मिट्टी स्वास्थ्य के बारे में कृषि प्रश्नों में मदद कर सकता हूं।"
   },
   "te-IN": {
-    rice_plant: "వరి నాటడానికి ఉత్తమ సమయం వర్షాకాలం (జూన్-జూలై). నాటడానికి 25-30 రోజుల ముందు నర్సరీ మడులు సిద్ధం చేయండి. వరి పొలాల్లో 2-3 అంగుళాల నీరు నిలుపుకోండి.",
-    rice_harvest: "గింజలు బంగారు పసుపు రంగులోకి మారినప్పుడు మరియు తేమ 20-25% ఉన్నప్పుడు వరి కోతకు సిద్ధంగా ఉంటుంది. పుష్పించిన 30-35 రోజుల తర్వాత కోయండి.",
-    rice_general: "వరికి 1200-1500 మిమీ నీరు అవసరం. మెరుగైన దిగుబడి కోసం SRI పద్ధతిని ఉపయోగించండి. హెక్టారుకు 120 కిలోల నత్రజని, 60 కిలోల భాస్వరం, 40 కిలోల పొటాషియం వేయండి.",
-    irrigation: "సరైన నీటిపారుదల కోసం, బాష్పీభవనాన్ని తగ్గించడానికి ఉదయం లేదా సాయంత్రం నీరు పెట్టండి. 30-40% నీటిని ఆదా చేయడానికి బిందు సేద్యాన్ని ఉపయోగించండి.",
-    pest: "సమగ్ర చీడపీడల నిర్వహణ కోసం: పర్యవేక్షణకు ఫెరోమోన్ ట్రాప్‌లు, సహజ ఆహారాలను విడుదల చేయండి, వారానికో వేప నూనె స్ప్రే చేయండి.",
-    disease: "వ్యాధి నియంత్రణ కోసం: సోకిన మొక్కలను వెంటనే తొలగించండి, రాగి ఆధారిత శిలీంద్ర నాశినులను వాడండి, సరైన నీటి పారుదల ఉండేలా చూడండి.",
-    fertilizer: "మట్టి పరీక్ష ఆధారంగా ఎరువులు వేయండి. చాలా పంటలకు సాధారణ NPK నిష్పత్తి 4:2:1. హెక్టారుకు 2-3 టన్నుల సేంద్రీయ ఎరువు వాడండి.",
-    hello: "హలో! నేను మీ వ్యవసాయ సహాయకుడిని. పంట సాగు, నీటిపారుదల, చీడపీడల నియంత్రణ, ఎరువులు, వాతావరణ మార్గదర్శకత్వం, మార్కెట్ ధరలు లేదా ప్రభుత్వ పథకాల గురించి అడగండి.",
-    thanks: "ధన్యవాదాలు! వ్యవసాయం గురించి మరిన్ని ప్రశ్నలు అడగడానికి సంకోచించకండి. మెరుగైన పంటలు పండించడంలో మీకు సహాయం చేయడానికి నేను ఇక్కడ ఉన్నాను.",
-    default: "నిర్దిష్ట పంటలు (వరి, గోధుమ, పత్తి, చెరకు, టమాటా, మొక్కజొన్న), నీటిపారుదల, చీడపీడల నియంత్రణ, ఎరువులు, నేల ఆరోగ్యం, వాతావరణం, మార్కెట్ ధరలు మరియు ప్రభుత్వ పథకాల గురించి వ్యవసాయ ప్రశ్నలకు నేను సహాయం చేయగలను!"
+    rice_plant: "వరి నాటడానికి ఉత్తమ సమయం రుతుపవన సీజన్ (జూన్-జూలై).",
+    rice_harvest: "గింజలు బంగారు పసుపు రంగుకు మారినప్పుడు వరి కోతకు సిద్ధంగా ఉంటుంది.",
+    rice_general: "వరికి 1200-1500 మి.మీ నీరు అవసరం.",
+    wheat_plant: "గోధుమ విత్తనం వేసే సమయం నవంబర్-డిసెంబర్.",
+    wheat_harvest: "గింజలు గట్టిగా మరియు బంగారు రంగులో ఉన్నప్పుడు గోధుమ సిద్ధంగా ఉంటుంది.",
+    wheat_general: "గోధుమకు 4-6 నీటిపారుదల అవసరం.",
+    sugarcane_plant: "చెరకును ఫిబ్రవరి-మార్చి లేదా సెప్టెంబర్-అక్టోబర్‌లో నాటండి.",
+    sugarcane_harvest: "చెరకు 10-12 నెలల్లో పరిపక్వం అవుతుంది.",
+    sugarcane_general: "చెరకుకు ప్రతి 7-10 రోజులకు నీటిపారుదల అవసరం.",
+    cotton_plant: "పత్తి మే-జూన్‌లో రుతుపవనాల ప్రారంభంలో విత్తబడుతుంది.",
+    cotton_pest: "బోల్‌వార్మ్ నియంత్రణకు ఫెరోమోన్ ట్రాప్‌లు మరియు వేప ఆధారిత స్ప్రేలు వాడండి.",
+    cotton_general: "పత్తికి 700-1200 మి.మీ నీరు అవసరం.",
+    tomato_plant: "25-30 రోజుల వయసు టమాటో మొలకలను నాటండి.",
+    tomato_disease: "లేట్ బ్లైట్‌కు రాగి ఆధారిత శిలీంద్ర నాశకాలు వాడండి.",
+    tomato_general: "టమాటోకు 600-800 మి.మీ నీరు అవసరం.",
+    maize_plant: "మొక్కజొన్నను ఖరీఫ్‌కు జూన్-జూలైలో విత్తండి.",
+    maize_harvest: "పొట్టు గోధుమ రంగుకు మారినప్పుడు మొక్కజొన్న సిద్ధంగా ఉంటుంది.",
+    maize_general: "మొక్కజొన్నకు 500-600 మి.మీ నీరు అవసరం.",
+    irrigation: "ఉత్తమ నీటిపారుదల కోసం ఉదయం లేదా సాయంత్రం నీరు పెట్టండి.",
+    pest: "సమగ్ర పురుగుల నిర్వహణకు ఫెరోమోన్ ట్రాప్‌లు వాడండి.",
+    disease: "వ్యాధి నియంత్రణకు బాధిత మొక్కలను వెంటనే తొలగించండి.",
+    fertilizer: "నేల పరీక్ష ఆధారంగా ఎరువులు వేయండి.",
+    weather: "రోజువారీ వాతావరణ సూచనలను పర్యవేక్షించండి.",
+    seed: "అధికారిక డీలర్ల నుండి ధృవీకరించబడిన విత్తనాలు వాడండి.",
+    soil: "pH మరియు పోషకాల కోసం ప్రతి 2-3 సంవత్సరాలకు నేలను పరీక్షించండి.",
+    market: "రోజువారీ మండి ధరల కోసం AGMARKNET పోర్టల్ చూడండి.",
+    scheme: "సులభ రుణాల కోసం కిసాన్ క్రెడిట్ కార్డ్ కోసం దరఖాస్తు చేయండి.",
+    hello: "నమస్కారం! నేను మీ వ్యవసాయ సహాయకుడిని. పంట సాగు, నీటిపారుదల, పురుగుల నియంత్రణ గురించి అడగండి.",
+    thanks: "ధన్యవాదాలు! వ్యవసాయం గురించి మరిన్ని ప్రశ్నలు అడగడానికి సంకోచించకండి.",
+    default: "నిర్దిష్ట పంటలు, నీటిపారుదల, పురుగుల నియంత్రణ, ఎరువులు గురించి వ్యవసాయ ప్రశ్నలలో నేను సహాయం చేయగలను."
+  },
+  "mr-IN": {
+    hello: "नमस्कार! मी तुमचा शेती सहाय्यक आहे. पीक लागवड, सिंचन, कीड नियंत्रण याबद्दल विचारा.",
+    default: "मी विशिष्ट पिके, सिंचन, कीड नियंत्रण, खते, माती आरोग्य याबद्दल शेती प्रश्नांमध्ये मदत करू शकतो."
+  },
+  "bn-IN": {
+    hello: "নমস্কার! আমি আপনার কৃষি সহায়ক। ফসল চাষ, সেচ, কীটপতঙ্গ নিয়ন্ত্রণ সম্পর্কে জিজ্ঞাসা করুন।",
+    default: "আমি নির্দিষ্ট ফসল, সেচ, কীটপতঙ্গ নিয়ন্ত্রণ, সার সম্পর্কে কৃষি প্রশ্নে সাহায্য করতে পারি।"
+  },
+  "gu-IN": {
+    hello: "નમસ્તે! હું તમારો ખેતી સહાયક છું. પાક ઉછેર, સિંચાઈ, જંતુ નિયંત્રણ વિશે પૂછો.",
+    default: "હું ચોક્કસ પાક, સિંચાઈ, જંતુ નિયંત્રણ, ખાતર વિશે ખેતી પ્રશ્નોમાં મદદ કરી શકું છું."
+  },
+  "kn-IN": {
+    hello: "ನಮಸ್ಕಾರ! ನಾನು ನಿಮ್ಮ ಕೃಷಿ ಸಹಾಯಕ. ಬೆಳೆ ಕೃಷಿ, ನೀರಾವರಿ, ಕೀಟ ನಿಯಂತ್ರಣ ಬಗ್ಗೆ ಕೇಳಿ.",
+    default: "ನಿರ್ದಿಷ್ಟ ಬೆಳೆಗಳು, ನೀರಾವರಿ, ಕೀಟ ನಿಯಂತ್ರಣ, ರಸಗೊಬ್ಬರಗಳ ಬಗ್ಗೆ ಕೃಷಿ ಪ್ರಶ್ನೆಗಳಲ್ಲಿ ನಾನು ಸಹಾಯ ಮಾಡಬಲ್ಲೆ."
+  },
+  "pa-IN": {
+    hello: "ਸਤ ਸ੍ਰੀ ਅਕਾਲ! ਮੈਂ ਤੁਹਾਡਾ ਖੇਤੀ ਸਹਾਇਕ ਹਾਂ। ਫ਼ਸਲ ਕਾਸ਼ਤ, ਸਿੰਚਾਈ, ਕੀੜੇ ਕੰਟਰੋਲ ਬਾਰੇ ਪੁੱਛੋ।",
+    default: "ਮੈਂ ਖਾਸ ਫ਼ਸਲਾਂ, ਸਿੰਚਾਈ, ਕੀੜੇ ਕੰਟਰੋਲ, ਖਾਦ ਬਾਰੇ ਖੇਤੀ ਸਵਾਲਾਂ ਵਿੱਚ ਮਦਦ ਕਰ ਸਕਦਾ ਹਾਂ।"
   }
 };
 
-// Get language key from code
 const getLangKey = (langCode: string): string => {
-  if (langCode.startsWith("ta")) return "ta-IN";
-  if (langCode.startsWith("hi")) return "hi-IN";
-  if (langCode.startsWith("te")) return "te-IN";
-  return "en-US";
+  return langCode;
 };
 
-// Get farming response based on query and language
 const getFarmingResponse = (query: string, lang: string): string => {
   const lowerQuery = query.toLowerCase();
   const langKey = getLangKey(lang);
   const langResponses = responses[langKey] || responses["en-US"];
-  
-  // Crop-specific responses with multilingual keywords
-  const riceKeywords = ["rice", "paddy", "நெல்", "அரிசி", "धान", "चावल", "వరి", "బియ్యం"];
-  const wheatKeywords = ["wheat", "கோதுமை", "गेहूं", "గోధుమ"];
-  const sugarcaneKeywords = ["sugarcane", "கரும்பு", "गन्ना", "చెరకు"];
-  const cottonKeywords = ["cotton", "பருத்தி", "कपास", "పత్తి"];
-  const tomatoKeywords = ["tomato", "தக்காளி", "टमाटर", "టమాటా"];
-  const maizeKeywords = ["maize", "corn", "மக்காச்சோளம்", "मक्का", "మొక్కజొన్న"];
-  const plantKeywords = ["plant", "sow", "நடவு", "விதை", "बोना", "रोपाई", "నాటు", "విత్తు"];
-  const harvestKeywords = ["harvest", "அறுவடை", "कटाई", "కోత"];
-  const waterKeywords = ["water", "irrigation", "தண்ணீர்", "பாசனம்", "पानी", "सिंचाई", "నీరు", "నీటిపారుదల"];
-  const pestKeywords = ["pest", "insect", "பூச்சி", "कीट", "చీడ", "పురుగు"];
-  const diseaseKeywords = ["disease", "fungus", "நோய்", "रोग", "వ్యాధి"];
-  const fertilizerKeywords = ["fertilizer", "nutrient", "manure", "உரம்", "उर्वरक", "खाद", "ఎరువు"];
-  const weatherKeywords = ["weather", "rain", "வானிலை", "மழை", "मौसम", "बारिश", "వాతావరణం", "వర్షం"];
-  const seedKeywords = ["seed", "விதை", "बीज", "విత్తనం"];
-  const soilKeywords = ["soil", "land", "மண்", "मिट्टी", "मट्टी"];
-  const marketKeywords = ["price", "market", "sell", "விலை", "சந்தை", "कीमत", "बाजार", "ధర", "మార్కెట్"];
-  const schemeKeywords = ["loan", "subsidy", "scheme", "கடன்", "திட்டம்", "ऋण", "योजना", "రుణం", "పథకం"];
-  const helloKeywords = ["hello", "hi", "hey", "வணக்கம்", "नमस्ते", "హలో"];
-  const thanksKeywords = ["thank", "நன்றி", "धन्यवाद", "ధన్యవాదాలు"];
 
-  const matchesAny = (keywords: string[]) => keywords.some(k => lowerQuery.includes(k));
-  
-  // Check crop-specific queries
-  if (matchesAny(riceKeywords)) {
-    if (matchesAny(plantKeywords)) return langResponses.rice_plant || responses["en-US"].rice_plant;
-    if (matchesAny(harvestKeywords)) return langResponses.rice_harvest || responses["en-US"].rice_harvest;
-    return langResponses.rice_general || responses["en-US"].rice_general;
+  const cropKeywords: Record<string, string> = {
+    rice: "rice", paddy: "rice", நெல்: "rice", धान: "rice", चावल: "rice", వరి: "rice",
+    wheat: "wheat", கோதுமை: "wheat", गेहूं: "wheat", గోధుమ: "wheat",
+    sugarcane: "sugarcane", கரும்பு: "sugarcane", गन्ना: "sugarcane", చెరకు: "sugarcane",
+    cotton: "cotton", பருத்தி: "cotton", कपास: "cotton", పత్తి: "cotton",
+    tomato: "tomato", தக்காளி: "tomato", टमाटर: "tomato", టమాటో: "tomato",
+    maize: "maize", corn: "maize", மக்காச்சோளம்: "maize", मक्का: "maize", మొక్కజొన్న: "maize",
+  };
+
+  let cropFound = "";
+  for (const [keyword, crop] of Object.entries(cropKeywords)) {
+    if (lowerQuery.includes(keyword)) {
+      cropFound = crop;
+      break;
+    }
   }
-  
-  if (matchesAny(wheatKeywords)) {
-    if (matchesAny(plantKeywords)) return langResponses.wheat_plant || responses["en-US"].wheat_plant;
-    if (matchesAny(harvestKeywords)) return langResponses.wheat_harvest || responses["en-US"].wheat_harvest;
-    return langResponses.wheat_general || responses["en-US"].wheat_general;
+
+  if (cropFound) {
+    const actionKeywords = {
+      plant: ["plant", "sow", "grow", "seed", "நடவு", "விதை", "बोना", "बुवाई", "నాటు", "విత్తనం"],
+      harvest: ["harvest", "cut", "pick", "அறுவடை", "कटाई", "कोत", "కోత"],
+      pest: ["pest", "insect", "bug", "worm", "பூச்சி", "कीट", "कीड़", "పురుగు"],
+      disease: ["disease", "blight", "rot", "fungus", "நோய்", "रोग", "बीमारी", "వ్యాధి"],
+    };
+
+    for (const [action, keywords] of Object.entries(actionKeywords)) {
+      if (keywords.some(k => lowerQuery.includes(k))) {
+        const key = `${cropFound}_${action}`;
+        if (langResponses[key]) return langResponses[key];
+      }
+    }
+    return langResponses[`${cropFound}_general`] || langResponses.default;
   }
-  
-  if (matchesAny(sugarcaneKeywords)) {
-    if (matchesAny(plantKeywords)) return langResponses.sugarcane_plant || responses["en-US"].sugarcane_plant;
-    if (matchesAny(harvestKeywords)) return langResponses.sugarcane_harvest || responses["en-US"].sugarcane_harvest;
-    return langResponses.sugarcane_general || responses["en-US"].sugarcane_general;
+
+  const topicKeywords: Record<string, string[]> = {
+    irrigation: ["irrigation", "water", "drip", "பாசனம்", "நீர்", "सिंचाई", "पानी", "నీటిపారుదల", "నీరు"],
+    pest: ["pest", "insect", "bug", "பூச்சி", "कीट", "కీటకం", "పురుగు"],
+    disease: ["disease", "blight", "rot", "நோய்", "रोग", "వ్యాధి"],
+    fertilizer: ["fertilizer", "npk", "urea", "உரம்", "खाद", "उर्वरक", "ఎరువు"],
+    weather: ["weather", "rain", "climate", "வானிலை", "மழை", "मौसम", "बारिश", "వాతావరణం"],
+    seed: ["seed", "விதை", "बीज", "విత్తనం"],
+    soil: ["soil", "மண்", "मिट्टी", "నేల"],
+    market: ["market", "price", "mandi", "சந்தை", "விலை", "बाजार", "मंडी", "మార్కెట్"],
+    scheme: ["scheme", "loan", "government", "திட்டம்", "योजना", "पद్ధతి"],
+  };
+
+  for (const [topic, keywords] of Object.entries(topicKeywords)) {
+    if (keywords.some(k => lowerQuery.includes(k))) {
+      return langResponses[topic] || langResponses.default;
+    }
   }
-  
-  if (matchesAny(cottonKeywords)) {
-    if (matchesAny(plantKeywords)) return langResponses.cotton_plant || responses["en-US"].cotton_plant;
-    if (matchesAny(pestKeywords)) return langResponses.cotton_pest || responses["en-US"].cotton_pest;
-    return langResponses.cotton_general || responses["en-US"].cotton_general;
+
+  const greetings = ["hello", "hi", "hey", "வணக்கம்", "नमस्ते", "నమస్కారం"];
+  if (greetings.some(g => lowerQuery.includes(g))) {
+    return langResponses.hello || langResponses.default;
   }
-  
-  if (matchesAny(tomatoKeywords)) {
-    if (matchesAny(plantKeywords)) return langResponses.tomato_plant || responses["en-US"].tomato_plant;
-    if (matchesAny(diseaseKeywords)) return langResponses.tomato_disease || responses["en-US"].tomato_disease;
-    return langResponses.tomato_general || responses["en-US"].tomato_general;
+
+  const thanksWords = ["thank", "thanks", "நன்றி", "धन्यवाद", "ధన్యవాదాలు"];
+  if (thanksWords.some(t => lowerQuery.includes(t))) {
+    return langResponses.thanks || langResponses.default;
   }
-  
-  if (matchesAny(maizeKeywords)) {
-    if (matchesAny(plantKeywords)) return langResponses.maize_plant || responses["en-US"].maize_plant;
-    if (matchesAny(harvestKeywords)) return langResponses.maize_harvest || responses["en-US"].maize_harvest;
-    return langResponses.maize_general || responses["en-US"].maize_general;
-  }
-  
-  // General topic responses
-  if (matchesAny(waterKeywords)) return langResponses.irrigation || responses["en-US"].irrigation;
-  if (matchesAny(pestKeywords)) return langResponses.pest || responses["en-US"].pest;
-  if (matchesAny(diseaseKeywords)) return langResponses.disease || responses["en-US"].disease;
-  if (matchesAny(fertilizerKeywords)) return langResponses.fertilizer || responses["en-US"].fertilizer;
-  if (matchesAny(weatherKeywords)) return langResponses.weather || responses["en-US"].weather;
-  if (matchesAny(seedKeywords)) return langResponses.seed || responses["en-US"].seed;
-  if (matchesAny(soilKeywords)) return langResponses.soil || responses["en-US"].soil;
-  if (matchesAny(marketKeywords)) return langResponses.market || responses["en-US"].market;
-  if (matchesAny(schemeKeywords)) return langResponses.scheme || responses["en-US"].scheme;
-  if (matchesAny(helloKeywords)) return langResponses.hello || responses["en-US"].hello;
-  if (matchesAny(thanksKeywords)) return langResponses.thanks || responses["en-US"].thanks;
-  
-  return langResponses.default || responses["en-US"].default;
+
+  return langResponses.default;
 };
 
 export const VoiceAssistant = () => {
   const [isListening, setIsListening] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState("en-US");
+  const [selectedSpeechLang, setSelectedSpeechLang] = useState("en-US");
   const [transcript, setTranscript] = useState("");
   const [response, setResponse] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+  const { t, language } = useLanguage();
+
+  // Sync speech language with global language
+  useEffect(() => {
+    const langMap: Record<string, string> = {
+      en: "en-US",
+      ta: "ta-IN",
+      hi: "hi-IN",
+      te: "te-IN",
+    };
+    setSelectedSpeechLang(langMap[language] || "en-US");
+  }, [language]);
 
   useEffect(() => {
-    // Check for browser support
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (SpeechRecognition) {
@@ -266,9 +315,8 @@ export const VoiceAssistant = () => {
           setIsListening(false);
           setIsProcessing(true);
           
-          // Generate response
           setTimeout(() => {
-            const farmResponse = getFarmingResponse(transcriptResult, selectedLanguage);
+            const farmResponse = getFarmingResponse(transcriptResult, selectedSpeechLang);
             setResponse(farmResponse);
             setIsProcessing(false);
           }, 500);
@@ -292,27 +340,27 @@ export const VoiceAssistant = () => {
         recognitionRef.current.abort();
       }
     };
-  }, [selectedLanguage]);
+  }, [selectedSpeechLang]);
 
   const toggleListening = () => {
     setError("");
     
     if (!recognitionRef.current) {
-      setError("Speech recognition is not supported in your browser. Please use Chrome or Edge.");
+      setError(t('speechNotSupported'));
       return;
     }
     
     if (!isListening) {
       setTranscript("");
       setResponse("");
-      recognitionRef.current.lang = selectedLanguage;
+      recognitionRef.current.lang = selectedSpeechLang;
       
       try {
         recognitionRef.current.start();
         setIsListening(true);
       } catch (err) {
         console.error("Failed to start recognition:", err);
-        setError("Failed to start microphone. Please check permissions.");
+        setError(t('failedMic'));
       }
     } else {
       recognitionRef.current.stop();
@@ -324,7 +372,7 @@ export const VoiceAssistant = () => {
     if ('speechSynthesis' in window && response) {
       speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(response);
-      utterance.lang = selectedLanguage;
+      utterance.lang = selectedSpeechLang;
       utterance.rate = 0.9;
       speechSynthesis.speak(utterance);
     }
@@ -334,20 +382,20 @@ export const VoiceAssistant = () => {
     <div className="feature-card">
       <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
         <Mic className="w-6 h-6 text-primary" />
-        Voice Assistant
+        {t('voiceAssistant')}
       </h3>
       
       <div className="mb-4">
         <label className="text-sm font-medium mb-2 flex items-center gap-2">
           <Globe className="w-4 h-4" />
-          Select Your Language
+          {t('selectLanguage')}
         </label>
-        <Select value={selectedLanguage} onValueChange={setSelectedLanguage}>
+        <Select value={selectedSpeechLang} onValueChange={setSelectedSpeechLang}>
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select language" />
+            <SelectValue placeholder={t('selectLanguage')} />
           </SelectTrigger>
           <SelectContent>
-            {languages.map((lang) => (
+            {speechLanguages.map((lang) => (
               <SelectItem key={lang.code} value={lang.code}>
                 <span className="flex items-center gap-2">
                   <span>{lang.flag}</span>
@@ -387,19 +435,19 @@ export const VoiceAssistant = () => {
         </button>
         <p className="mt-4 text-lg font-medium">
           {isProcessing 
-            ? "Processing..." 
+            ? t('processing')
             : isListening 
-            ? "Listening... Speak now" 
-            : "Tap to ask a question"}
+            ? t('listeningSpeak')
+            : t('tapToAsk')}
         </p>
         <p className="text-sm text-muted-foreground mt-1">
-          Ask about harvesting, irrigation, pests, fertilizers, or weather
+          {t('askAbout')}
         </p>
       </div>
       
       {transcript && (
         <div className="mt-4 p-4 bg-muted rounded-xl">
-          <p className="text-sm text-muted-foreground mb-1">You said:</p>
+          <p className="text-sm text-muted-foreground mb-1">{t('youSaid')}</p>
           <p className="font-medium">{transcript}</p>
         </div>
       )}
@@ -407,9 +455,9 @@ export const VoiceAssistant = () => {
       {response && (
         <div className="mt-4 p-4 bg-growth-light border-2 border-growth rounded-xl">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-sm font-medium text-growth">Assistant Response:</p>
+            <p className="text-sm font-medium text-growth">{t('assistantResponse')}</p>
             <Button variant="ghost" size="sm" onClick={speakResponse}>
-              <Volume2 className="w-4 h-4 mr-1" /> Listen
+              <Volume2 className="w-4 h-4 mr-1" /> {t('listen')}
             </Button>
           </div>
           <p className="text-foreground">{response}</p>

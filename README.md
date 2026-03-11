@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+**URL**: URL: https://crop-whisperer-ai
 
 ## How can I edit this code?
 

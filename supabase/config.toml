@@ -2,3 +2,6 @@ project_id = "ngitixixhcyhupgossrc"
 
 [functions.get-weather]
 verify_jwt = false
+
+[functions.suggest-crops]
+verify_jwt = false

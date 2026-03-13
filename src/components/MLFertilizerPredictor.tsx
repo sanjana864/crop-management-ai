@@ -75,6 +75,7 @@ const growthStages: GrowthStage[] = ['seedling', 'vegetative', 'flowering', 'fru
 const weatherConditions: WeatherCondition[] = ['dry', 'moderate', 'rainy', 'humid'];
 
 export const MLFertilizerPredictor = () => {
+  const { selectedCrop, weatherConditionForML, temperatureForML } = useFarmWorkflow();
   const [input, setInput] = useState<Partial<MLInput>>({
     crop: '',
     soilType: 'loamy',
@@ -88,6 +89,21 @@ export const MLFertilizerPredictor = () => {
   const [products, setProducts] = useState<FertilizerProduct[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
   const { t, language } = useLanguage();
+
+  // Auto-fill from workflow context
+  useEffect(() => {
+    if (selectedCrop) {
+      setInput(prev => ({ ...prev, crop: selectedCrop }));
+    }
+  }, [selectedCrop]);
+
+  useEffect(() => {
+    setInput(prev => ({
+      ...prev,
+      weather: weatherConditionForML as WeatherCondition,
+      temperature: temperatureForML,
+    }));
+  }, [weatherConditionForML, temperatureForML]);
 
   const handlePredict = async () => {
     if (!input.crop) {

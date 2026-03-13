@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Cloud, Sun, CloudRain, Wind, Droplets, Thermometer, Loader2 } from "lucide-react";
 import { useWeather } from "@/hooks/useWeather";
 import { LocationSelector, LOCATIONS } from "./LocationSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useFarmWorkflow } from "@/contexts/FarmWorkflowContext";
 
 const WeatherIcon = ({ condition }: { condition: string }) => {
   switch (condition) {

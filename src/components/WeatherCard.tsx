@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Cloud, Sun, CloudRain, Wind, Droplets, Thermometer, Loader2 } from "lucide-react";
 import { useWeather } from "@/hooks/useWeather";
 import { LocationSelector, LOCATIONS } from "./LocationSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useFarmWorkflow } from "@/contexts/FarmWorkflowContext";
 
 const WeatherIcon = ({ condition }: { condition: string }) => {
   switch (condition) {
@@ -23,12 +24,20 @@ export const WeatherCard = () => {
     useCurrentLocation: true,
   });
   const { t } = useLanguage();
+  const { setWeatherData } = useFarmWorkflow();
 
   const { weather, loading, error } = useWeather({
     latitude: coords.lat,
     longitude: coords.lon,
     useCurrentLocation: coords.useCurrentLocation,
   });
+
+  // Sync weather data to workflow context
+  useEffect(() => {
+    if (weather) {
+      setWeatherData(weather);
+    }
+  }, [weather]);
 
   const handleLocationChange = (locationName: string) => {
     setSelectedLocationName(locationName);

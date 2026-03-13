@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Brain, Leaf, Droplets, ThermometerSun, CloudRain, FlaskConical, AlertTriangle, CheckCircle, TrendingUp, Server } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useFarmWorkflow } from "@/contexts/FarmWorkflowContext";
 
 type SoilType = 'clay' | 'sandy' | 'loamy' | 'black' | 'red' | 'alluvial';
 type GrowthStage = 'seedling' | 'vegetative' | 'flowering' | 'fruiting' | 'maturity';
@@ -74,6 +75,7 @@ const growthStages: GrowthStage[] = ['seedling', 'vegetative', 'flowering', 'fru
 const weatherConditions: WeatherCondition[] = ['dry', 'moderate', 'rainy', 'humid'];
 
 export const MLFertilizerPredictor = () => {
+  const { selectedCrop, weatherConditionForML, temperatureForML } = useFarmWorkflow();
   const [input, setInput] = useState<Partial<MLInput>>({
     crop: '',
     soilType: 'loamy',
@@ -87,6 +89,21 @@ export const MLFertilizerPredictor = () => {
   const [products, setProducts] = useState<FertilizerProduct[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
   const { t, language } = useLanguage();
+
+  // Auto-fill from workflow context
+  useEffect(() => {
+    if (selectedCrop) {
+      setInput(prev => ({ ...prev, crop: selectedCrop }));
+    }
+  }, [selectedCrop]);
+
+  useEffect(() => {
+    setInput(prev => ({
+      ...prev,
+      weather: weatherConditionForML as WeatherCondition,
+      temperature: temperatureForML,
+    }));
+  }, [weatherConditionForML, temperatureForML]);
 
   const handlePredict = async () => {
     if (!input.crop) {

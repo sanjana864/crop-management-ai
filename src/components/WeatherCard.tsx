@@ -24,12 +24,20 @@ export const WeatherCard = () => {
     useCurrentLocation: true,
   });
   const { t } = useLanguage();
+  const { setWeatherData } = useFarmWorkflow();
 
   const { weather, loading, error } = useWeather({
     latitude: coords.lat,
     longitude: coords.lon,
     useCurrentLocation: coords.useCurrentLocation,
   });
+
+  // Sync weather data to workflow context
+  useEffect(() => {
+    if (weather) {
+      setWeatherData(weather);
+    }
+  }, [weather]);
 
   const handleLocationChange = (locationName: string) => {
     setSelectedLocationName(locationName);

@@ -15,6 +15,7 @@ import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useFarmWorkflow } from "@/contexts/FarmWorkflowContext";
 
 type SoilType = 'clay' | 'sandy' | 'loamy' | 'black' | 'red' | 'alluvial';
 type GrowthStage = 'seedling' | 'vegetative' | 'flowering' | 'fruiting' | 'maturity';
